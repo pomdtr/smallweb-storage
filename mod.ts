@@ -1,13 +1,13 @@
 // fix: Type instantiation is excessively deep and possibly infinite error
 // ref: https://github.com/supabase/supabase-js/issues/808#issuecomment-2143815626
-export type JSONValue<D extends number = 9, DA extends any[] = []> =
+export type JsonValue<D extends number = 9, DA extends any[] = []> =
     | string
     | number
     | boolean
     | null
     | (D extends DA["length"] ? any
-        : { [key: string]: JSONValue<D, [0, ...DA]> | undefined })
-    | (D extends DA["length"] ? any : JSONValue<D, [0, ...DA]>[]);
+        : { [key: string]: JsonValue<D, [0, ...DA]> | undefined })
+    | (D extends DA["length"] ? any : JsonValue<D, [0, ...DA]>[]);
 
 export abstract class SmallwebStorage {
     abstract get(
