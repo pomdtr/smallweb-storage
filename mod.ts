@@ -1,11 +1,13 @@
 export type JsonObject = { [key: string]: JsonValue };
 
+export type JsonArray = JsonValue[];
+
 export type JsonValue =
-    | null
     | boolean
     | number
     | string
-    | JsonValue[]
+    | null
+    | JsonArray
     | JsonObject;
 
 export abstract class SmallwebStorage {
@@ -44,7 +46,7 @@ export abstract class SmallwebStorage {
         return JSON.parse(text);
     }
 
-    setJSON(key: string, value: JsonValue): Promise<void> {
+    setJson(key: string, value: JsonValue): Promise<void> {
         const text = JSON.stringify(value);
         const bytes = new TextEncoder().encode(text);
         return this.set(key, bytes);

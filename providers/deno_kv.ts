@@ -1,4 +1,4 @@
-import { SmallwebStorage } from "../mod.ts";
+import { JsonValue, SmallwebStorage } from "../mod.ts";
 
 const kv = await Deno.openKv();
 
@@ -28,6 +28,26 @@ export class KvStorage extends SmallwebStorage {
 
     async delete(key: string): Promise<void> {
         await kv.delete(this.fullKey(key));
+    }
+
+    async setJSON(key: string, value: JsonValue): Promise<void> {
+        await kv.set(this.fullKey(key), value);
+    }
+
+    async getJson<T extends JsonValue = JsonValue>(
+        key: string,
+    ): Promise<T | null> {
+        const res = await kv.get<T>(this.fullKey(key));
+        return res.value;
+    }
+
+    async setText(key: string, value: string): Promise<void> {
+        await kv.set(this.fullKey(key), value);
+    }
+
+    async getText(key: string): Promise<string | null> {
+        const res = await kv.get<string>(this.fullKey(key));
+        return res.value;
     }
 
     async *list(): AsyncIterable<string> {
