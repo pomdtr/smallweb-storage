@@ -42,8 +42,8 @@ export class LocalStorage extends SmallwebStorage {
 
     setJSON(key: string, value: any): Promise<void> {
         const text = JSON.stringify(value);
-        const bytes = new TextEncoder().encode(text);
-        return this.set(key, bytes);
+        localStorage.setItem(key, text);
+        return Promise.resolve();
     }
 
     getText(key: string): Promise<string | null> {
