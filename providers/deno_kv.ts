@@ -30,22 +30,22 @@ export class KvStorage extends SmallwebStorage {
         await kv.delete(this.fullKey(key));
     }
 
-    async setJSON(key: string, value: any): Promise<void> {
+    override async setJson(key: string, value: any): Promise<void> {
         await kv.set(this.fullKey(key), value);
     }
 
-    async getJson<T = any>(
+    override async getJson<T = any>(
         key: string,
     ): Promise<T | null> {
         const res = await kv.get<T>(this.fullKey(key));
         return res.value;
     }
 
-    async setText(key: string, value: string): Promise<void> {
+    override async setText(key: string, value: string): Promise<void> {
         await kv.set(this.fullKey(key), value);
     }
 
-    async getText(key: string): Promise<string | null> {
+    override async getText(key: string): Promise<string | null> {
         const res = await kv.get<string>(this.fullKey(key));
         return res.value;
     }

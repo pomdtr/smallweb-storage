@@ -31,7 +31,7 @@ export class LocalStorage extends SmallwebStorage {
         return Promise.resolve();
     }
 
-    getJson<T = any>(key: string): Promise<T | null> {
+    override getJson<T = any>(key: string): Promise<T | null> {
         const text = localStorage.getItem(key);
         if (text === null) {
             return Promise.resolve(null);
@@ -40,13 +40,13 @@ export class LocalStorage extends SmallwebStorage {
         return Promise.resolve(JSON.parse(text));
     }
 
-    setJSON(key: string, value: any): Promise<void> {
+    override setJson(key: string, value: any): Promise<void> {
         const text = JSON.stringify(value);
         localStorage.setItem(key, text);
         return Promise.resolve();
     }
 
-    getText(key: string): Promise<string | null> {
+    override getText(key: string): Promise<string | null> {
         const text = localStorage.getItem(key);
         if (text === null) {
             return Promise.resolve(null);
@@ -55,7 +55,7 @@ export class LocalStorage extends SmallwebStorage {
         return Promise.resolve(text);
     }
 
-    setText(key: string, value: string): Promise<void> {
+    override setText(key: string, value: string): Promise<void> {
         localStorage.setItem(key, value);
         return Promise.resolve();
     }
