@@ -1,11 +1,18 @@
 {
     "name": "@smallweb/storage",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "exports": {
         ".": "./mod.ts",
         "./local-storage": "./providers/local_storage.ts",
         "./deno-kv": "./providers/deno_kv.ts",
         "./val-town": "./providers/val_town.ts"
+    },
+    "lint": {
+        "rules": {
+            "exclude": [
+                "no-explicit-any"
+            ]
+        }
     },
     "imports": {
         "@std/encoding": "jsr:@std/encoding@^1.0.1",
