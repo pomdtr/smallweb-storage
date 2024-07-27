@@ -1,4 +1,4 @@
-import { JsonValue, SmallwebStorage } from "../mod.ts";
+import { SmallwebStorage } from "../mod.ts";
 import { decodeBase64, encodeBase64 } from "@std/encoding/base64";
 
 export class StorageError extends Error {}
@@ -31,7 +31,7 @@ export class LocalStorage extends SmallwebStorage {
         return Promise.resolve();
     }
 
-    getJson<T extends JsonValue = JsonValue>(key: string): Promise<T | null> {
+    getJson<T = any>(key: string): Promise<T | null> {
         const text = localStorage.getItem(key);
         if (text === null) {
             return Promise.resolve(null);
@@ -40,7 +40,7 @@ export class LocalStorage extends SmallwebStorage {
         return Promise.resolve(JSON.parse(text));
     }
 
-    setJSON(key: string, value: JsonValue): Promise<void> {
+    setJSON(key: string, value: any): Promise<void> {
         const text = JSON.stringify(value);
         const bytes = new TextEncoder().encode(text);
         return this.set(key, bytes);
