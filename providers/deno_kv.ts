@@ -32,7 +32,7 @@ export class KvStorage implements Storage {
         await kv.delete(this.fullKey(key));
     }
 
-    async *list(prefix?: string): AsyncIterator<string> {
+    async *list(prefix?: string): AsyncIterable<string> {
         for await (
             const entry of kv.list({
                 prefix: this.prefix,

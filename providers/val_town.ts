@@ -85,7 +85,7 @@ export class ValtownStorage implements Storage {
         }
     }
 
-    async *list(prefix?: string): AsyncIterator<string> {
+    async *list(prefix?: string): AsyncIterable<string> {
         const resp = await this.fetch(
             `/v1/blob?prefix=${encodeURIComponent(this.prefix)}`,
         );
