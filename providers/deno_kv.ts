@@ -1,4 +1,4 @@
-import { SmallwebStorage } from "../mod.ts";
+import type { Storage, Value } from "../mod.ts";
 
 const kv = await Deno.openKv();
 
@@ -6,10 +6,10 @@ export type KvStorageOptions = {
     prefix?: string[];
 };
 
-export class KvStorage extends SmallwebStorage {
+export class KvStorage implements Storage {
     public prefix: string[];
+
     constructor(options: KvStorageOptions = {}) {
-        super();
         this.prefix = options.prefix || [];
     }
 
@@ -17,54 +17,37 @@ export class KvStorage extends SmallwebStorage {
         return [...this.prefix, key];
     }
 
-    async get(key: string): Promise<Uint8Array | null> {
-        const res = await kv.get<Uint8Array>(this.fullKey(key));
-        return res.value;
-    }
-
-    async set(key: string, value: Uint8Array): Promise<void> {
-        await kv.set(this.fullKey(key), value);
-    }
-
-    async delete(key: string): Promise<void> {
-        await kv.delete(this.fullKey(key));
-    }
-
-    override async setJson(key: string, value: any): Promise<void> {
-        await kv.set(this.fullKey(key), value);
-    }
-
-    override async getJson<T = any>(
+    async get<T extends Value = Value>(
         key: string,
     ): Promise<T | null> {
         const res = await kv.get<T>(this.fullKey(key));
         return res.value;
     }
 
-    override async setText(key: string, value: string): Promise<void> {
+    async set(key: string, value: Value): Promise<void> {
         await kv.set(this.fullKey(key), value);
     }
 
-    override async getText(key: string): Promise<string | null> {
-        const res = await kv.get<string>(this.fullKey(key));
-        return res.value;
+    async remove(key: string): Promise<void> {
+        await kv.delete(this.fullKey(key));
     }
 
-    async *list(): AsyncIterable<string> {
+    async *list(prefix?: string): AsyncIterator<string> {
         for await (
             const entry of kv.list({
                 prefix: this.prefix,
             })
         ) {
-            if (entry.key.length === 1) {
-                yield entry.key[0].toString();
+            if (entry.key.length !== this.prefix.length + 1) {
+                continue;
             }
 
-            if (entry.key.length === 2) {
-                yield entry.key[1].toString();
+            const key = entry.key[entry.key.length - 1] as string;
+            if (prefix && !key.startsWith(prefix)) {
+                continue;
             }
 
-            throw new Error("Unexpected key length");
+            yield key;
         }
     }
 }

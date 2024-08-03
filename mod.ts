@@ -1,55 +1,9 @@
-export abstract class SmallwebStorage {
-    abstract get(
+export type Value = string | number | boolean;
+export interface Storage {
+    get<T extends Value = Value>(
         key: string,
-    ): Promise<Uint8Array | null>;
-    abstract set(key: string, value: Uint8Array): Promise<void>;
-    abstract delete(key: string): Promise<void>;
-    abstract list(): AsyncIterable<string>;
-
-    keys(): Promise<string[]> {
-        return Array.fromAsync(this.list());
-    }
-
-    async copy(oldKey: string, newKey: string): Promise<void> {
-        const bytes = await this.get(oldKey);
-        if (!bytes) {
-            throw new Error(`Key not found: ${oldKey}`);
-        }
-        await this.set(newKey, bytes);
-    }
-
-    async rename(oldKey: string, newKey: string): Promise<void> {
-        await this.copy(oldKey, newKey);
-        await this.delete(oldKey);
-    }
-
-    async getJson<T = any>(
-        key: string,
-    ): Promise<T | null> {
-        const bytes = await this.get(key);
-        if (!bytes) {
-            return null;
-        }
-        const text = new TextDecoder().decode(bytes);
-        return JSON.parse(text);
-    }
-
-    setJson(key: string, value: any): Promise<void> {
-        const text = JSON.stringify(value);
-        const bytes = new TextEncoder().encode(text);
-        return this.set(key, bytes);
-    }
-
-    async getText(key: string): Promise<string | null> {
-        const bytes = await this.get(key);
-        if (!bytes) {
-            return null;
-        }
-        return new TextDecoder().decode(bytes);
-    }
-
-    setText(key: string, value: string): Promise<void> {
-        const bytes = new TextEncoder().encode(value);
-        return this.set(key, bytes);
-    }
+    ): Promise<T | null>;
+    set(key: string, value: Value): Promise<void>;
+    remove(key: string): Promise<void>;
+    list(prefix?: string): AsyncIterator<string>;
 }

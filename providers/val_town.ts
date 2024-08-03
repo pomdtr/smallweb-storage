@@ -1,5 +1,4 @@
-import { NotFoundError, StorageError } from "./local_storage.ts";
-import { SmallwebStorage } from "../mod.ts";
+import type { Storage, Value } from "../mod.ts";
 
 export type ValtownStorageOptions = {
     token?: string;
@@ -7,13 +6,14 @@ export type ValtownStorageOptions = {
     apiUrl?: string;
 };
 
-export class ValtownStorage extends SmallwebStorage {
+export class StorageError extends Error {}
+
+export class ValtownStorage implements Storage {
     public token: string;
     public prefix: string;
     public apiUrl: string;
 
     constructor(options: ValtownStorageOptions = {}) {
-        super();
         this.token = options.token || Deno.env.get("valtown") || "";
         this.apiUrl = options.apiUrl || "https://api.val.town/";
         this.prefix = options.prefix || "";
@@ -39,27 +39,27 @@ export class ValtownStorage extends SmallwebStorage {
         return `${this.prefix}${key}`;
     }
 
-    async get(key: string): Promise<Uint8Array | null> {
+    async get<T extends Value = Value>(key: string): Promise<T | null> {
         const resp = await this.fetch(
             `/v1/blob/${encodeURIComponent(this.fullKey(key))}`,
         );
         if (!resp.ok) {
             if (resp.status == 404) {
-                throw new NotFoundError(key);
+                return null;
             }
 
             throw new StorageError(`Unable to read blob: ${await resp.text()}`);
         }
 
-        return new Uint8Array(await resp.arrayBuffer());
+        return await resp.json() as T;
     }
 
-    async set(key: string, value: Uint8Array): Promise<void> {
+    async set(key: string, value: Value): Promise<void> {
         const resp = await this.fetch(
             `/v1/blob/${encodeURIComponent(this.fullKey(key))}`,
             {
                 method: "POST",
-                body: value,
+                body: JSON.stringify(value),
             },
         );
 
@@ -70,7 +70,7 @@ export class ValtownStorage extends SmallwebStorage {
         }
     }
 
-    async delete(key: string): Promise<void> {
+    async remove(key: string): Promise<void> {
         const resp = await this.fetch(
             `/v1/blob/${encodeURIComponent(this.fullKey(key))}`,
             {
@@ -85,14 +85,19 @@ export class ValtownStorage extends SmallwebStorage {
         }
     }
 
-    async *list(): AsyncIterable<string> {
-        const resp = await this.fetch(`/v1/blob`);
+    async *list(prefix?: string): AsyncIterator<string> {
+        const resp = await this.fetch(
+            `/v1/blob?prefix=${encodeURIComponent(this.prefix)}`,
+        );
         if (!resp.ok) {
             throw new StorageError();
         }
 
         const entries = await resp.json();
         for (const entry of entries) {
+            if (prefix && !entry.name.startsWith(prefix)) {
+                continue;
+            }
             yield entry.name;
         }
     }
