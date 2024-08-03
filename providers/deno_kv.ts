@@ -32,7 +32,20 @@ export class KvStorage implements Storage {
         await kv.delete(this.fullKey(key));
     }
 
-    async *list(prefix?: string): AsyncIterable<string> {
+    async clear(): Promise<void> {
+        const promises = [];
+        for await (
+            const entry of kv.list({
+                prefix: this.prefix,
+            })
+        ) {
+            promises.push(kv.delete(entry.key));
+        }
+
+        await Promise.all(promises);
+    }
+
+    async *list(): AsyncIterable<string> {
         for await (
             const entry of kv.list({
                 prefix: this.prefix,
@@ -43,10 +56,6 @@ export class KvStorage implements Storage {
             }
 
             const key = entry.key[entry.key.length - 1] as string;
-            if (prefix && !key.startsWith(prefix)) {
-                continue;
-            }
-
             yield key;
         }
     }

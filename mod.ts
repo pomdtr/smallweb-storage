@@ -5,5 +5,6 @@ export interface Storage {
     ): Promise<T | null>;
     set(key: string, value: Value): Promise<void>;
     remove(key: string): Promise<void>;
-    list(prefix?: string): AsyncIterable<string>;
+    list(): AsyncIterable<string>;
+    clear(): Promise<void>;
 }

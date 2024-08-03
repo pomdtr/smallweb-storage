@@ -20,11 +20,13 @@ export class LocalStorage implements Storage {
         return Promise.resolve();
     }
 
-    async *list(prefix?: string): AsyncIterable<string> {
+    clear(): Promise<void> {
+        localStorage.clear();
+        return Promise.resolve();
+    }
+
+    async *list(): AsyncIterable<string> {
         for (const key of Object.keys(localStorage)) {
-            if (prefix && !key.startsWith(prefix)) {
-                continue;
-            }
             yield key;
         }
     }

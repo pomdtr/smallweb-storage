@@ -85,7 +85,13 @@ export class ValtownStorage implements Storage {
         }
     }
 
-    async *list(prefix?: string): AsyncIterable<string> {
+    async clear(): Promise<void> {
+        for await (const key of this.list()) {
+            await this.remove(key);
+        }
+    }
+
+    async *list(): AsyncIterable<string> {
         const resp = await this.fetch(
             `/v1/blob?prefix=${encodeURIComponent(this.prefix)}`,
         );
@@ -95,9 +101,6 @@ export class ValtownStorage implements Storage {
 
         const entries = await resp.json();
         for (const entry of entries) {
-            if (prefix && !entry.name.startsWith(prefix)) {
-                continue;
-            }
             yield entry.name;
         }
     }
