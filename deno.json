@@ -1,6 +1,6 @@
 {
     "name": "@smallweb/storage",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "exports": {
         ".": "./mod.ts",
         "./local-storage": "./providers/local_storage.ts",
